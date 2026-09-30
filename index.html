@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Funeral Rosa de Saron - Fichas Individuais</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        :root { 
+            --primaria: #8B4513; --secundaria: #F5DEB3; --aviso: #ffc107; 
+            --perigo: #dc3545; --sucesso: #28a745; --claro: #fff8e6;
+            --entrada: #008000; --saida: #d9534f; --saldo: #0275d8;
+        }
+        body { background: #f9f6f0; padding: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { background: var(--primaria); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        nav button { flex: 1; min-width: 110px; padding: 12px; border: none; border-radius: 6px; background: var(--secundaria); cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
+        nav button.ativo { background: var(--primaria); color: white; }
+        .aba { display: none; }
+        .aba.ativa { display: block; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { color: var(--primaria); margin-bottom: 15px; border-bottom: 2px solid var(--secundaria); padding-bottom: 8px; }
+        .grupo { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-primario { background: var(--primaria); color: white; padding: 10px 18px; margin: 5px 5px 5px 0; }
+        .btn-sucesso { background: var(--sucesso); color: white; padding: 10px 18px; margin: 5px 5px 5px 0; }
+        .btn-perigo { background: var(--perigo); color: white; padding: 10px 18px; margin: 5px 5px 5px 0; }
+        .btn-aviso { background: var(--aviso); color: #212529; padding: 10px 18px; margin: 5px 5px 5px 0; }
+        .btn-pequeno { padding: 6px 10px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--claro); color: var(--primaria); }
+        .atrasado { background: #fff0f0; color: var(--perigo); font-weight: bold; }
+        .emdia { color: var(--sucesso); font-weight: bold; }
+        .alerta { background: #fff3cd; border-left: 4px solid var(--aviso); padding: 12px; margin: 10px 0; border-radius: 0 4px 4px 0; }
+        
+        /* === FICHA INDIVIDUAL === */
+        .ficha-container { 
+            border: 3px solid var(--primaria); 
+            border-radius: 8px; 
+            background: #fffef5; 
+            padding: 25px; 
+            margin: 15px 0;
+            box-shadow: 2px 2px 8px rgba(139,69,19,0.15);
+        }
+        .ficha-cabecalho { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secundaria);
+            padding-bottom: 15px;
+        }
+        .ficha-campo { display: flex; flex-direction: column; }
+        .ficha-campo label { font-size: 12px; color: #666; margin-bottom: 2px; }
+        .ficha-campo span { font-weight: 600; color: #333; }
+        .ficha-titulo { text-align: center; color: var(--primaria); font-size: 22px; font-weight: bold; margin-bottom: 15px; }
+        .ficha-tabela { width: 100%; border: 2px solid #ddd; margin-top: 10px; }
+        .ficha-tabela th { background: var(--primaria); color: white; text-align: center; padding: 12px; }
+        .ficha-tabela td { text-align: center; border: 1px solid #ddd; padding: 10px; font-size: 14px; }
+        .parcela-paga { background: #f0fff4; }
+        .parcela-atraso { background: #fff0f0; }
+        .parcela-aberta { background: #fffff8; }
+        .btn-voltar { background: #6c757d; color: white; margin-bottom: 15px; }
+        .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .resumo-card { padding: 15px; border-radius: 6px; text-align: center; color: white; font-weight: bold; }
+        .resumo-card.total { background: var(--primaria); }
+        .resumo-card.emdia { background: var(--sucesso); }
+        .resumo-card.atraso { background: var(--perigo); }
+        .resumo-card.cobradores { background: #6c757d; }
+        .resumo-card.entradas { background: var(--entrada); }
+        .resumo-card.saidas { background: var(--saida); }
+        .resumo-card.saldo { background: var(--saldo); }
+        .tipo-entrada { color: var(--entrada); font-weight: bold; }
+        .tipo-saida { color: var(--saida); font-weight: bold; }
+        .caixa-filtros { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .caixa-filtros select, .caixa-filtros input { flex: 1; min-width: 120px; }
+        .oculto { display: none !important; }
+        @media print {
+            body { background: white; padding: 0; }
+            header, nav, .btn-voltar, button:not(.imprimir) { display: none !important; }
+            .ficha-container { border: 2px solid #8B4513; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>⚰️ Plano Funeral Rosa de Saron</h1>
+        <p>Controle de Fichas Individuais e Fluxo de Caixa</p>
+    </header>
+
+    <nav>
+        <button class="aba-btn ativo" data-alvo="painel">📊 Painel</button>
+        <button class="aba-btn" data-alvo="clientes">👤 Clientes</button>
+        <button class="aba-btn" data-alvo="cobradores">📋 Cobradores</button>
+        <button class="aba-btn" data-alvo="caixa">💰 Fluxo de Caixa</button>
+        <button class="aba-btn" data-alvo="avisos">🔔 Atrasos</button>
+    </nav>
+
+    <!-- PAINEL PRINCIPAL - APENAS RESUMO GERAL -->
+    <div id="painel" class="aba ativa">
+        <div class="resumo">
+            <div class="resumo-card total">
+                <h3 id="qtd-total">0</h3>
+                <p>Total Clientes</p>
+            </div>
+            <div class="resumo-card.emdia">
+                <h3 id="qtd-emdia">0</h3>
+                <p>Em Dia</p>
+            </div>
+            <div class="resumo-card.atraso">
+                <h3 id="qtd-atraso">0</h3>
+                <p>Em Atraso</p>
+            </div>
+            <div class="resumo-card.cobradores">
+                <h3 id="qtd-cobradores">0</h3>
+                <p>Cobradores</p>
+            </div>
+            <div class="resumo-card.entradas">
+                <h3 id="total-entradas">R$ 0,00</h3>
+                <p>Total Entradas</p>
+            </div>
+            <div class="resumo-card.saidas">
+                <h3 id="total-saidas">R$ 0,00</h3>
+                <p>Total Saídas</p>
+            </div>
+            <div class="resumo-card.saldo">
+                <h3 id="saldo-atual">R$ 0,00</h3>
+                <p>Saldo Atual</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Lista de Clientes — Clique para abrir a Ficha</h2>
+            <div id="lista-clientes-painel"></div>
+        </div>
+    </div>
+
+    <!-- CLIENTES: CADASTRO + FICHA INDIVIDUAL -->
+    <div id="clientes" class="aba">
+        <div id="tela-lista-clientes">
+            <div class="card">
+                <h2>➕ Cadastrar Novo Cliente</h2>
+                <button class="btn-primario" onclick="mostrarFormularioCadastro()">Novo Cliente</button>
+            </div>
+            <div class="card">
+                <h2>📋 Todos os Clientes</h2>
+                <div id="tabela-clientes"></div>
+            </div>
+        </div>
+
+        <div id="tela-form-cliente" class="oculto">
+            <button class="btn-voltar" onclick="voltarListaClientes()">← Voltar</button>
+            <div class="card">
+                <h2 id="titulo-form-cliente">➕ Cadastrar Novo Cliente</h2>
+                <form id="form-cliente">
+                    <input type="hidden" id="cliente-id">
+                    <div class="grupo">
+                        <label>Nome Completo do Sócio *</label>
+                        <input type="text" id="cliente-nome" required placeholder="Maria Candida Maracajá">
+                    </div>
+                    <div class="grupo">
+                        <label>Contrato Nº</label>
+                        <input type="text" id="cliente-contrato" placeholder="4185">
+                    </div>
+                    <div class="grupo">
+                        <label>Endereço</label>
+                        <input type="text" id="cliente-endereco" placeholder="Rua P-07, Bairro Santo Antônio">
+                    </div>
+                    <div class="grupo">
+                        <label>Ponto de Referência *</label>
+                        <input type="text" id="cliente-referencia" required placeholder="Avenida P1, lado direito">
+                    </div>
+                    <div class="grupo">
+                        <label>Cidade / Telefone</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" id="cliente-cidade" placeholder="Cidade" style="flex:2;">
+                            <input type="tel" id="cliente-telefone" placeholder="(99) 99999-9999" style="flex:1;">
+                        </div>
+                    </div>
+                    <div class="grupo">
+                        <label>Valor Mensal R$ *</label>
+                        <input type="number" id="cliente-valor" step="0.01" required value="10.00">
+                    </div>
+                    <div class="grupo">
+                        <label>Cobrador Responsável</label>
+                        <select id="cliente-cobrador">
+                            <option value="">-- Selecione --</option>
+                        </select>
+                    </div>
+
+                    <h3 style="margin:20px 0 10px; color:var(--primaria);">📝 Ficha de Pagamentos</h3>
+                    <table class="ficha-tabela">
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Data de Vencimento</th>
+                                <th>Data de Pagamento</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-parcelas-form"></tbody>
+                    </table>
+                    <button type="button" class="btn-aviso" style="width:100%; margin:0; border-radius:0 0 6px 6px;" onclick="adicionarLinhaParcela()">➕ Adicionar Parcela</button>
+
+                    <button type="submit" class="btn-primario" style="margin-top:15px;">💾 Salvar Cliente</button>
+                    <button type="button" class="btn-perigo" onclick="voltarListaClientes()">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- FICHA INDIVIDUAL COMPLETA DE CADA CLIENTE -->
+        <div id="tela-ficha-cliente" class="oculto">
+            <button class="btn-voltar" onclick="voltarListaClientes()">← Voltar à Lista</button>
+            
+            <div class="ficha-container" id="conteudo-ficha"></div>
+            
+            <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-primario imprimir" onclick="imprimirFicha()">🖨️ Imprimir Ficha</button>
+                <button class="btn-aviso" onclick="editarClienteAtual()">✏️ Editar</button>
+                <button class="btn-perigo" onclick="excluirClienteAtual()">🗑️ Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COBRADORES -->
+    <div id="cobradores" class="aba">
+        <div class="card">
+            <h2>👤 Cadastrar Cobrador</h2>
+            <form id="form-cobrador">
+                <div class="grupo">
+                    <label>Nome *</label>
+                    <input type="text" id="cobrador-nome" required>
+                </div>
+                <div class="grupo">
+                    <label>Telefone</label>
+                    <input type="tel" id="cobrador-tel">
+                </div>
+                <div class="grupo">
+                    <label>Região / Bairro</label>
+                    <input type="text" id="cobrador-regiao">
+                </div>
+                <button type="submit" class="btn-primario">💾 Salvar</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2>📋 Cobradores</h2>
+            <div id="lista-cobradores"></div>
+        </div>
+    </div>
+
+    <!-- FLUXO DE CAIXA — AQUI FICA TUDO DE CAIXA -->
+    <div id="caixa" class="aba">
+        <div class="card">
+            <h2>➕ Lançamento de Caixa</h2>
+            <form id="form-caixa">
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <div class="grupo" style="flex:min(180px,100%);">
+                        <label>Data *</label>
+                        <input type="date" id="caixa-data" required>
+                    </div>
+                    <div class="grupo" style="flex:min(180px,100%);">
+                        <label>Tipo *</label>
+                        <select id="caixa-tipo" required>
+                            <option value="">-- Selecione --</option>
+                            <option value="entrada">✅ ENTRADA</option>
+                            <option value="saida">➖ SAÍDA</option>
+                        </select>
+                    </div>
+                    <div class="grupo" style="flex:min(150px,100%);">
+                        <label>Valor R$ *</label>
+                        <input type="number" id="caixa-valor" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+                <div class="grupo">
+                    <label>Especificação / Descrição *</label>
+                    <textarea id="caixa-especificacao" required rows="3" placeholder="Ex: Recebimento parcela — Contrato 4185 / Combustível para cobrança"></textarea>
+                </div>
+                <div class="grupo">
+                    <label>Cliente (opcional)</label>
+                    <select id="caixa-cliente">
+                        <option value="">-- Não vincular --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primario">💾 Registrar</button>
+                <button type="reset" class="btn-aviso">🔄 Limpar</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>📊 Fluxo de Caixa — Movimentos</h2>
+            <div class="caixa-filtros">
+                <select id="filtro-tipo" onchange="listarMovimentosCaixa()">
+                    <option value="todos">Todos</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="saida">Saídas</option>
+                </select>
+                <input type="month" id="filtro-mes" onchange="listarMovimentosCaixa()">
+                <button class="btn-aviso" onclick="limparFiltrosCaixa()">🔄 Limpar</button>
+            </div>
+            
+            <div style="margin:10px 0; padding:12px; background:#f5f5f5; border-radius:6px;">
+                <strong>Resumo:</strong>
+                <span id="resumo-caixa"></span>
+            </div>
+
+            <div id="tabela-caixa"></div>
+        </div>
+    </div>
+
+    <!-- AVISOS DE ATRASO -->
+    <div id="avisos" class="aba">
+        <div class="card">
+            <h2>🔔 Pagamentos em Atraso</h2>
+            <div style="margin-bottom:15px;">
+                <label>Filtrar por Cobrador:</label>
+                <select id="filtro-cobrador" onchange="carregarAvisos()">
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+            <div id="lista-atrasos"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// === BANCO DE DADOS ===
+let clientes = JSON.parse(localStorage.getItem('clientesRosaSaron')) || [];
+let cobradores = JSON.parse(localStorage.getItem('cobradoresRosaSaron')) || [];
+let movimentosCaixa = JSON.parse(localStorage.getItem('caixaRosaSaron')) || [];
+let clienteEmExibicao = null;
+
+// === NAVEGAÇÃO ===
+document.querySelectorAll('.aba-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('ativo'));
+        document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
+        btn.classList.add('ativo');
+        document.getElementById(btn.dataset.alvo).classList.add('ativa');
+        
+        if (btn.dataset.alvo === 'painel') atualizarPainel();
+        if (btn.dataset.alvo === 'clientes') { voltarListaClientes(); listarClientesTabela(); }
+        if (btn.dataset.alvo === 'caixa') { preencherSelectCaixaClientes(); listarMovimentosCaixa(); }
+        if (btn.dataset.alvo === 'avisos') carregarAvisos();
+    });
+});
+
+// === TELAS CLIENTES ===
+function mostrarFormularioCadastro() {
+    document.getElementById('tela-lista-clientes').classList.add('oculto');
+    document.getElementById('tela-form-cliente').classList.remove('oculto');
+    document.getElementById('tela-ficha-cliente').classList.add('oculto');
+    limparFormularioCliente();
+}
+
+function voltarListaClientes() {
+    document.getElementById('tela-lista-clientes').classList.remove('oculto');
+    document.getElementById('tela-form-cliente').classList.add('oculto');
+    document.getElementById('tela-ficha-cliente').classList.add('oculto');
+    clienteEmExibicao = null;
+}
+
+// === FICHA INDIVIDUAL DO CLIENTE ===
+function exibirFichaCliente(clienteId) {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (!cliente) return;
+    
+    clienteEmExibicao = cliente;
+    document.getElementById('tela-lista-clientes').classList.add('oculto');
+    document.getElementById('tela-form-cliente').classList.add('oculto');
+    document.getElementById('tela-ficha-cliente').classList.remove('oculto');
+    
+    const cobrador = cobradores.find(c => c.id === cliente.cobradorId);
+    const hoje = new Date();
+    
+    let fichaHTML = `
+        <div class="ficha-titulo">⚰️ PLANO FUNERAL ROSA DE SARON</div>
+        
+        <div class="ficha-cabecalho">
+            <div class="ficha-campo" style="grid-column: span 2;">
+                <label>Nome do Sócio</label>
+                <span>${cliente.nome}</span>
+            </div>
+            <div class="ficha-campo">
+                <label>Contrato Nº</label>
+                <span>${cliente.contrato || 'Não informado'}</span>
+            </div>
+            <div class="ficha-campo">
+                <label>Valor Mensal</label>
+                <span>R$ ${cliente.valor.toFixed(2)}</span>
+            </div>
+            <div class="ficha-campo" style="grid-column: span 2;">
+                <label>Endereço</label>
+                <span>${cliente.endereco || 'Não informado'}</span>
+            </div>
+            <div class="ficha-campo" style="grid-column: span 2;">
+                <label>Ponto de Referência</label>
+                <span>${cliente.referencia}</span>
+            </div>
+            <div class="ficha-campo">
+                <label>Cidade</label>
+                <span>${cliente.cidade || 'Não informada'}</span>
+            </div>
+            <div class="ficha-campo">
+                <label>Telefone</label>
+                <span>${cliente.telefone || 'Não informado'}</span>
+            </div>
+            <div class="ficha-campo" style="grid-column: span 2;">
+                <label>Cobrador Responsável</label>
+                <span>${cobrador?.nome || 'Não atribuído'}</span>
+            </div>
+        </div>
+
+        <h3 style="text-align:center; margin:20px 0 10px; color:var(--primaria);">📝 FICHA DE PAGAMENTOS</h3>
+        <table class="ficha-tabela">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Data de Vencimento</th>
+                    <th>Data de Pagamento</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    if (!cliente.parcelas?.length) {
+        fichaHTML += `<tr><td colspan="5" style="text-align:center; color:#666;">Nenhuma parcela cadastrada</td></tr>`;
+    } else {
+        cliente.parcelas.forEach((p, idx) => {
+            let classe = 'parcela-aberta', status = '⏳ Pendente', botao = '';
+            
+            if (p.pagamento) {
+                classe = 'parcela-paga';
+                status = '✅ PAGO';
+            } else {
+                const [d, m, a] = p.vencimento.split('/').map(Number);
+                const venc = new Date(2000+a, m-1, d);
+                if (venc < hoje) {
+                    classe = 'parcela-atraso';
+                    status = '🔴 EM ATRASO';
+                }
+                botao = `<button class="btn-sucesso btn-pequeno" onclick="marcarPago('${cliente.id}', '${p.vencimento}')">Marcar Pago</button>`;
+            }
+            
+            fichaHTML += `
+                <tr class="${classe}">
+                    <td><strong>${idx+1}</strong></td>
+                    <td>${p.vencimento}</td>
+                    <td>${p.pagamento || '—'}</td>
+                    <td>${status}</td>
+                    <td>${botao}</td>
+                </tr>
+            `;
+        });
+    }
+    
+    fichaHTML += `</tbody></table>`;
+    document.getElementById('conteudo-ficha').innerHTML = fichaHTML;
+}
+
+function marcarPago(clienteId, venc) {
+    const cli = clientes.find(c => c.id === clienteId);
+    if (!cli) return;
+    const parcela = cli.parcelas.find(p => p.vencimento === venc);
+    if (!parcela) return;
+    
+    const hoje = new Date();
+    parcela.pagamento = hoje.toLocaleDateString('pt-BR');
+    
+    // Lança automaticamente no caixa
+    movimentosCaixa.push({
+        id: Date.now().toString(),
+        data: hoje.toISOString().split('T')[0],
+        tipo: 'entrada',
+        valor: cli.valor,
+        especificacao: `Recebimento parcela — Contrato ${cli.contrato || 's/n'} — Venc. ${venc}`,
+        clienteId: cli.id
+    });
+    
+    salvarDados();
+    exibirFichaCliente(clienteId);
+    atualizarPainel();
+    alert('✅ Parcela paga! Valor lançado no Fluxo de Caixa.');
+}
+
+function editarClienteAtual() { if (clienteEmExibicao) editarCliente(clienteEmExibicao.id); }
+function excluirClienteAtual() { 
+    if (clienteEmExibicao && confirm(`Excluir ${clienteEmExibicao.nome}?`)) {
+        excluirCliente(clienteEmExibicao.id);
+    }
+}
+function imprimirFicha() { window.print(); }
+
+// === PARCELAS NO CADASTRO ===
+let linhaCount = 0;
+function adicionarLinhaParcela(venc='', pgto='') {
+    linhaCount++;
+    const corpo = document.getElementById('corpo-parcelas-form');
+    const tr = document.createElement('tr');
+    tr.id = `linha-${linhaCount}`;
+    tr.innerHTML = `
+        <td style="text-align:center; font-weight:bold;">${linhaCount}</td>
+        <td><input type="text" class="parcela-venc" placeholder="dd/mm/aa" value="${venc}"></td>
+        <td><input type="text" class="parcela-pgto" placeholder="dd/mm/aa" value="${pgto}"></td>
+        <td style="text-align:center;"><button type="button" class="btn-perigo btn-pequeno" onclick="document.getElementById('linha-${linhaCount}').remove()">✕</button></td>
+    `;
+    corpo.appendChild(tr);
+}
+
+function limparFormularioCliente() {
+    document.getElementById('form-cliente').reset();
+    document.getElementById('cliente-id').value = '';
+    document.getElementById('corpo-parcelas-form').innerHTML = '';
+    linhaCount = 0;
+}
+
+// === COBRADORES ===
+function carregarSelectCobradores() {
+    const sel = document.getElementById('cliente-cobrador');
+    const filtro = document.getElementById('filtro-cobrador');
+    sel.innerHTML = '<option value="">-- Selecione --</option>';
+    filtro.innerHTML = '<option value="todos">Todos</option>';
+    cobradores.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+        filtro.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    });
+}
+
+document.getElementById('form-cobrador').addEventListener('submit', e => {
+    e.preventDefault();
+    cobradores.push({
+        id: Date.now().toString(),
+        nome: document.getElementById('cobrador-nome').value.trim(),
+        telefone: document.getElementById('cobrador-tel').value.trim(),
+        regiao: document.getElementById('cobrador-regiao').value.trim()
+    });
+    salvarDados();
+    listarCobradores(); carregarSelectCobradores(); e.target.reset();
+    alert('✅ Cobrador cadastrado!');
+});
+
+function listarCobradores() {
+    const div = document.getElementById('lista-cobradores');
+    if (!cobradores.length) { div.innerHTML = '<p style="color:#666;">Nenhum cobrador.</p>'; return; }
+    div.innerHTML = '<table><tr><th>Nome</th><th>Telefone</th><th>Região</th><th>Ações</th></tr>';
+    cobradores.forEach(c => {
+        div.innerHTML += `<tr><td>${c.nome}</td><td>${c.telefone||'-'}</td><td>${c.regiao||'-'}</td>
+            <td><button class="btn-perigo btn-pequeno" onclick="cobradores=cobradores.filter(x=>x.id!='${c.id}');salvarDados();listarCobradores();carregarSelectCobradores();">Excluir</button></td></tr>`;
+    });
+    div.innerHTML += '</table>';
+}
+
+// === CLIENTES ===
+document.getElementById('form-cliente').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('cliente-id').value;
+    const parcelas = [];
+    document.querySelectorAll('#corpo-parcelas-form tr').forEach(tr => {
+        const v = tr.querySelector('.parcela-venc').value.trim();
+        const p = tr.querySelector('.parcela-pgto').value.trim();
+        if (v) parcelas.push({ vencimento: v, pagamento: p });
+    });
+
+    const dados = {
+        id: id || Date.now().toString(),
+        nome: document.getElementById('cliente-nome').value.trim(),
+        contrato: document.getElementById('cliente-contrato').value.trim(),
+        endereco: document.getElementById('cliente-endereco').value.trim(),
+        referencia: document.getElementById('cliente-referencia').value.trim(),
+        cidade: document.getElementById('cliente-cidade').value.trim(),
+        telefone: document.getElementById('cliente-telefone').value.trim(),
+        valor: parseFloat(document.getElementById('cliente-valor').value),
+        cobradorId: document.getElementById('cliente-cobrador').value,
+        parcelas,
+        dataCadastro: new Date().toISOString()
+    };
+
+    if (id) clientes = clientes.map(c => c.id === id ? dados : c);
+    else clientes.push(dados);
+    
+    salvarDados();
+    voltarListaClientes();
+    atualizarPainel();
+    preencherSelectCaixaClientes();
+    alert(id ? '✅ Atualizado!' : '✅ Cadastrado!');
+});
+
+function listarClientesTabela() {
+    const tb = document.getElementById('tabela-clientes');
+    const pn = document.getElementById('lista-clientes-painel');
+    const hoje = new Date();
+    
+    const montar = (lista, alvo) => {
+        if (!lista.length) { alvo.innerHTML = '<p style="color:#666;">Nenhum cliente cadastrado.</p>'; return; }
+        alvo.innerHTML = '<table><tr><th>Nome</th><th>Contrato</th><th>Valor</th><th>Status</th><th>Ficha</th></tr>';
+        lista.forEach(c => {
+            const atraso = verificarAtraso(c, hoje);
+            alvo.innerHTML += `
+                <tr>
+                    <td>${c.nome}</td>
+                    <td>${c.contrato||'-'}</td>
+                    <td>R$ ${c.valor.toFixed(2)}</td>
+                    <td>${atraso ? '<span class="atrasado">🔴 ATRASO</span>' : '<span class="emdia">🟢 Em Dia</span>'}</td>
+                    <td><button class="btn-primario btn-pequeno" onclick="exibirFichaCliente('${c.id}')">📋 Ver Ficha</button></td>
+                </tr>
+            `;
+        });
+        alvo.innerHTML += '</table>';
+    };
+    montar(clientes, tb);
+    montar(clientes, pn);
+}
+
+function verificarAtraso(c, hoje) {
+    if (!c.parcelas) return false;
+    for (const p of c.parcelas) {
+        if (!p.pagamento && p.vencimento) {
+            const [d, m, a] = p.vencimento.split('/').map(Number);
+            if (new Date(2000+a, m-1, d) < hoje) return true;
+        }
+    }
+    return false;
+}
+
+function editarCliente(id) {
+    const c = clientes.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('tela-lista-clientes').classList.add('oculto');
+    document.getElementById('tela-form-cliente').classList.remove('oculto');
+    document.getElementById('tela-ficha-cliente').classList.add('oculto');
+    
+    document.getElementById('cliente-id').value = c.id;
+    document.getElementById('cliente-nome').value = c.nome;
+    document.getElementById('cliente-contrato').value = c.contrato;
+    document.getElementById('cliente-endereco').value = c.endereco;
+    document.getElementById('cliente-referencia').value = c.referencia;
+    document.getElementById('cliente-cidade').value = c.cidade;
+    document.getElementById('cliente-telefone').value = c.telefone;
+    document.getElementById('cliente-valor').value = c.valor;
+    document.getElementById('cliente-cobrador').value = c.cobradorId;
+    
+    document.getElementById('corpo-parcelas-form').innerHTML = '';
+    linhaCount = 0;
+    c.parcelas?.forEach(p => adicionarLinhaParcela(p.vencimento, p.pagamento));
+}
+
+function excluirCliente(id) {
+    clientes = clientes.filter(c => c.id !== id);
+    salvarDados(); voltarListaClientes(); atualizarPainel(); preencherSelectCaixaClientes();
+}
+
+// === FLUXO DE CAIXA ===
+function preencherSelectCaixaClientes() {
+    const sel = document.getElementById('caixa-cliente');
+    sel.innerHTML = '<option value="">-- Não vincular --</option>';
+    clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome} — ${c.contrato||'s/n'}</option>`);
+}
+
+document.getElementById('form-caixa').addEventListener('submit', e => {
+    e.preventDefault();
+    movimentosCaixa.push({
+        id: Date.now().toString(),
+        data: document.getElementById('caixa-data').value,
+        tipo: document.getElementById('caixa-tipo').value,
+        valor: parseFloat(document.getElementById('caixa-valor').value),
+        especificacao: document.getElementById('caixa-especificacao').value.trim(),
+        clienteId: document.getElementById('caixa-cliente').value
+    });
+    salvarDados(); e.target.reset();
+    document.getElementById('caixa-data').value = new Date().toISOString().split('T')[0];
+    listarMovimentosCaixa(); atualizarPainel();
+    alert('✅ Movimento registrado!');
+});
+
+function listarMovimentosCaixa() {
+    const tipo = document.getElementById('filtro-tipo').value;
+    const mes = document.getElementById('filtro-mes').value;
+    let dados = [...movimentosCaixa];
+    
+    if (tipo !== 'todos') dados = dados.filter(m => m.tipo === tipo);
+    if (mes) dados = dados.filter(m => m.data.startsWith(mes));
+    dados.sort((a, b) => new Date(b.data) - new Date(a.data));
+    
+    const entradas = dados.filter(m => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
+    const saidas = dados.filter(m => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
+    const saldo = entradas - saidas;
+    
+    document.getElementById('resumo-caixa').innerHTML = 
+        `Entradas: <strong class="tipo-entrada">R$ ${entradas.toFixed(2)}</strong> | Saídas: <strong class="tipo-saida">R$ ${saidas.toFixed(2)}</strong> | Saldo: <strong style="color:${saldo>=0?'green':'red'}">R$ ${saldo.toFixed(2)}</strong>`;
+    
+    const tb = document.getElementById('tabela-caixa');
+    if (!dados.length) { tb.innerHTML = '<p style="color:#666;">Nenhum movimento.</p>'; return; }
+    tb.innerHTML = '<table><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Especificação</th><th>Cliente</th><th>Excluir</th></tr>';
+    dados.forEach(m => {
+        const cli = m.clienteId ? clientes.find(c => c.id === m.clienteId) : null;
+        tb.innerHTML += `
+            <tr>
+                <td>${new Date(m.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                <td class="${m.tipo==='entrada'?'tipo-entrada':'tipo-saida'}">${m.tipo==='entrada'?'✅ Entrada':'➖ Saída'}</td>
+                <td style="font-weight:bold;">R$ ${m.valor.toFixed(2)}</td>
+                <td>${m.especificacao}</td>
+                <td style="font-size:12px;">${cli?cli.nome:'—'}</td>
+                <td><button class="btn-perigo btn-pequeno" onclick="if(confirm('Excluir?')){movimentosCaixa=movimentosCaixa.filter(x=>x.id!='${m.id}');salvarDados();listarMovimentosCaixa();atualizarPainel();}">✕</button></td>
+            </tr>
+        `;
+    });
+    tb.innerHTML += '</table>';
+}
+
+function limparFiltrosCaixa() {
+    document.getElementById('filtro-tipo').value = 'todos';
+    document.getElementById('filtro-mes').value = '';
+    listarMovimentosCaixa();
+}
+
+// === AVISOS DE ATRASO ===
+function carregarAvisos() {
+    const filtro = document.getElementById('filtro-cobrador').value;
+    const div = document.getElementById('lista-atrasos');
+    const hoje = new Date();
+    const lista = [];
+    
+    clientes.forEach(c => {
+        if (filtro !== 'todos' && c.cobradorId !== filtro) return;
+        c.parcelas?.forEach(p => {
+            if (!p.pagamento && p.vencimento) {
+                const [d, m, a] = p.vencimento.split('/').map(Number);
+                if (new Date(2000+a, m-1, d) < hoje) {
+                    lista.push({ cliente: c, parcela: p });
+                }
+            }
+        });
+    });
+    
+    if (!lista.length) {
+        div.innerHTML = '<div class="alerta" style="background:#d4edda; border-color:#28a745;"><strong>✅ Nenhum pagamento em atraso!</strong></div>';
+        return;
+    }
+    
+    div.innerHTML = `<p><strong>${lista.length}</strong> parcela(s) em atraso</p>`;
+    lista.forEach(av => {
+        div.innerHTML += `
+            <div class="alerta">
+                <h4>🔴 ${av.cliente.nome}</h4>
+                <p>Contrato: ${av.cliente.contrato||'-'} | Venc.: ${av.parcela.vencimento}</p>
+                <p>Valor: R$ ${av.cliente.valor.toFixed(2)}</p>
+                <button class="btn-sucesso" onclick="marcarPago('${av.cliente.id}', '${av.parcela.vencimento}')">✅ Marcar Pago</button>
+                <button class="btn-primario btn-pequeno" style="margin-left:8px;" onclick="exibirFichaCliente('${av.cliente.id}')">📋 Ver Ficha</button>
+            </div>
+        `;
+    });
+}
+
+// === PAINEL ===
+function atualizarPainel() {
+    const hoje = new Date();
+    let emDia = 0, emAtraso = 0;
+    clientes.forEach(c => verificarAtraso(c, hoje) ? emAtraso++ : emDia++);
+    
+    const entradas = movimentosCaixa.filter(m => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
+    const saidas = movimentosCaixa.filter(m => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
+    
+    document.getElementById('qtd-total').textContent = clientes.length;
+    document.getElementById('qtd-emdia').textContent = emDia;
+    document.getElementById('qtd-atraso').textContent = emAtraso;
+    document.getElementById('qtd-cobradores').textContent = cobradores.length;
+    document.getElementById('total-entradas').textContent = `R$ ${entradas.toFixed(2)}`;
+    document.getElementById('total-saidas').textContent = `R$ ${saidas.toFixed(2)}`;
+    document.getElementById('saldo-atual').textContent = `R$ ${(entradas - saidas).toFixed(2)}`;
+    
+    listarClientesTabela();
+}
+
+// === SALVAR DADOS ===
+function salvarDados() {
+    localStorage.setItem('clientesRosaSaron', JSON.stringify(clientes));
+    localStorage.setItem('cobradoresRosaSaron', JSON.stringify(cobradores));
+    localStorage.setItem('caixaRosaSaron', JSON.stringify(movimentosCaixa));
+}
+
+// === INICIALIZAÇÃO ===
+window.onload = () => {
+    document.getElementById('caixa-data').value = new Date().toISOString().split('T')[0];
+    carregarSelectCobradores();
+    listarCobradores();
+    atualizarPainel();
+    preencherSelectCaixaClientes();
+    
+    // DADO DE EXEMPLO
+    if (!clientes.length) {
+        clientes = [{
+            id: 'ex1',
+            nome: 'Maria Candida Maracajá',
+            contrato: '4185',
+            endereco: 'Rua P-07, Bairro Santo Antônio',
+            referencia: 'Avenida P1, lado direito',
+            cidade: 'Caracaraí',
+            telefone: '(95) 99165-6272',
+            valor: 10.00,
+            cobradorId: '',
+            parcelas: [
+                {vencimento:'29/01/26', pagamento:'29/01/26'},
+                {vencimento:'28/02/26', pagamento:'28/02/26'},
+                {vencimento:'28/03/26', pagamento:'28/03/26'},
+                {vencimento:'28/04/26', pagamento:'28/04/26'},
+                {vencimento:'28/05/26', pagamento:'28/05/26'},
+                {vencimento:'28/06/26', pagamento:'28/06/26'},
+                {vencimento:'28/07/26', pagamento:'28/07/26'},
+                {vencimento:'28/08/26', pagamento:'28/08/26'},
+                {vencimento:'28/09/26', pagamento:''}
+            ]
+        }];
+        movimentosCaixa = [
+            {id:'m1', data:'2026-01-29', tipo:'entrada', valor:10.00, especificacao:'Recebimento parcela — Contrato 4185', clienteId:'ex1'},
+            {id:'m2', data:'2026-02-15', tipo:'saida', valor:25.50, especificacao:'Material de escritório — papel e canetas', clienteId:''}
+        ];
+        salvarDados();
+        atualizarPainel();
+    }
+};
+</script>
+</div>
+</body>
+</html>
